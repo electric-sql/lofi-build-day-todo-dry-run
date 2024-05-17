@@ -43,21 +43,36 @@ export const Example = () => {
     })
   }
 
+  const deleteList = async () => {
+    // Delete list
+  }
+
   const items: Item[] = results ?? []
 
   return (
-    <div>
-      <div className="controls">
-        <button className="button" onClick={addItem}>
-          Add
-        </button>
-        <button className="button" onClick={clearItems}>
-          Clear Done
-        </button>
+    <div className="todos">
+      <div className="lists">
+        <button className="list-button active">List 1</button>
+        <button className="list-button">List 2</button>
+        <button className="list-button">+ New list</button>
       </div>
-      {items.map((item: Item, index: number) => (
-        <ItemLine key={index} item={item} />
-      ))}
+      <div className="items">
+        <input type="text" className="list-name" value="List 1" />
+        <div className="controls">
+          <button className="button" onClick={addItem}>
+            Add Item
+          </button>
+          <button className="button" onClick={clearItems}>
+            Clear Done
+          </button>
+          <button className="button" onClick={deleteList}>
+            Delete List
+          </button>
+        </div>
+        {items.map((item: Item, index: number) => (
+          <ItemLine key={index} item={item} />
+        ))}
+      </div>
     </div>
   )
 }
