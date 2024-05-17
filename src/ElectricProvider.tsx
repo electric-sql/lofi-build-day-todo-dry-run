@@ -3,14 +3,20 @@ import { useEffect, useState } from 'react'
 import { LIB_VERSION } from 'electric-sql/version'
 import { makeElectricContext } from 'electric-sql/react'
 import { uniqueTabId } from 'electric-sql/util'
-import { ElectricDatabase, electrify } from 'electric-sql/wa-sqlite'
+// import { ElectricDatabase, electrify } from 'electric-sql/wa-sqlite'
 
 import { authToken } from './auth'
 import { Electric, schema } from './generated/client'
 
 const { ElectricProvider, useElectric } = makeElectricContext<Electric>()
 
+const CLIENT_DB: 'wa-sqlite' | 'pglite' =
+  import.meta.env.ELECTRIC_CLIENT_DB || 'wa-sqlite'
+
 let toolbarAdded = false
+let conn
+let client
+
 
 const ElectricProviderComponent = ({
   children,
@@ -29,10 +35,20 @@ const ElectricProviderComponent = ({
       }
 
       const { tabId } = uniqueTabId()
-      const scopedDbName = `basic-${LIB_VERSION}-${tabId}.db`
+      const scopedDbName = `basic-${LIB_VERSION}-${tabId.slice(0, 8)}.db`
 
-      const conn = await ElectricDatabase.init(scopedDbName)
-      const client = await electrify(conn, schema, config)
+      if (CLIENT_DB === 'wa-sqlite') {
+        const { ElectricDatabase, electrify } = await import('electric-sql/wa-sqlite')
+        conn ??= await ElectricDatabase.init(scopedDbName)
+        client ??= await electrify(conn, schema, config)
+      } else {
+        const { electrify } = await import('electric-sql/pglite')
+        const { PGlite } = await import('@electric-sql/pglite')
+        conn ??= new PGlite(`idb://${scopedDbName}`, {
+          relaxedDurability: true,
+        })
+        client ??= await electrify(conn, schema, config)
+      }
       await client.connect(authToken())
 
       if (config.debug && !toolbarAdded) {
