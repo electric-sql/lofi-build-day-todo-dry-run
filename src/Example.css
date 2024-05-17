@@ -52,7 +52,6 @@
   color: #f9fdff;
   font-size: 13px;
   padding: 10px 18px 10px 10px;
-  border-radius: 0 32px 32px 0;
 }
 
 .item-checkbox {
@@ -62,4 +61,18 @@
   margin: 0 10px;
   padding: 0;
   border-radius: 100%;
+}
+
+.delete-button {
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  border-radius: 32px;
+  background: #1e2123;
+  border: 2px solid #229089;
+  color: #f9fdff;
+  font-weight: 500;
+  padding: 5px 9px;
+  margin: 0 4px;
 }

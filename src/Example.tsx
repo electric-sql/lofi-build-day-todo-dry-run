@@ -8,7 +8,9 @@ import './Example.css'
 
 export const Example = () => {
   const { db } = useElectric()!
-  const { results } = useLiveQuery(db.items.liveMany())
+  const { results } = useLiveQuery(db.items.liveMany({
+    orderBy: { created_at: 'desc' },
+  }))
 
   useEffect(() => {
     const syncItems = async () => {
@@ -28,6 +30,7 @@ export const Example = () => {
         id: genUUID(),
         task: 'New task',
         done: false,
+        created_at: new Date(),
       },
     })
   }
@@ -88,6 +91,12 @@ const ItemLine = ({ item }: { item: Item }) => {
           updateItem(e.currentTarget.value)
         }}
       />
+      <button
+        className="delete-button"
+        onClick={() => {
+          db.items.delete({ where: { id: item.id } })
+        }}
+      >Delete</button>
     </p>
   )
 }

@@ -13,7 +13,8 @@
 CREATE TABLE IF NOT EXISTS items (
   id TEXT PRIMARY KEY NOT NULL,
   task TEXT NOT NULL,
-  done BOOLEAN NOT NULL
+  done BOOLEAN NOT NULL,
+  created_at TIMESTAMP NOT NULL
 );
 
 -- ⚡
