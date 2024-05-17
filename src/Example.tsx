@@ -36,7 +36,11 @@ export const Example = () => {
   }
 
   const clearItems = async () => {
-    await db.items.deleteMany()
+    await db.items.deleteMany({
+      where: {
+        done: { equals: true },
+      },
+    })
   }
 
   const items: Item[] = results ?? []
@@ -48,7 +52,7 @@ export const Example = () => {
           Add
         </button>
         <button className="button" onClick={clearItems}>
-          Clear
+          Clear Done
         </button>
       </div>
       {items.map((item: Item, index: number) => (
