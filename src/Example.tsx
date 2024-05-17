@@ -25,7 +25,9 @@ export const Example = () => {
   const addItem = async () => {
     await db.items.create({
       data: {
-        value: genUUID(),
+        id: genUUID(),
+        task: 'New task',
+        done: false,
       },
     })
   }
@@ -47,10 +49,45 @@ export const Example = () => {
         </button>
       </div>
       {items.map((item: Item, index: number) => (
-        <p key={index} className="item">
-          <code>{item.value}</code>
-        </p>
+        <ItemLine key={index} item={item} />
       ))}
     </div>
+  )
+}
+
+const ItemLine = ({ item }: { item: Item }) => {
+  const { db } = useElectric()!
+
+  const updateItem = async (task: string) => {
+    await db.items.update({
+      where: { id: item.id },
+      data: { task },
+    })
+  }
+
+  const toggleDone = async () => {
+    await db.items.update({
+      where: { id: item.id },
+      data: { done: !item.done },
+    })
+  }
+
+  return (
+    <p className={`item ${item.done ? 'done' : ''}`}>
+      <input
+        type="checkbox"
+        className="item-checkbox"
+        checked={item.done}
+        onChange={toggleDone}
+      />
+      <input
+        type="text"
+        className="item-input"
+        value={item.task}
+        onChange={(e) => {
+          updateItem(e.currentTarget.value)
+        }}
+      />
+    </p>
   )
 }
