@@ -10,6 +10,8 @@ import { Electric, schema } from './generated/client'
 
 const { ElectricProvider, useElectric } = makeElectricContext<Electric>()
 
+let toolbarAdded = false
+
 const ElectricProviderComponent = ({
   children,
 }: {
@@ -32,6 +34,12 @@ const ElectricProviderComponent = ({
       const conn = await ElectricDatabase.init(scopedDbName)
       const client = await electrify(conn, schema, config)
       await client.connect(authToken())
+
+      if (config.debug && !toolbarAdded) {
+        toolbarAdded = true
+        const { addToolbar } = await import('@electric-sql/debug-toolbar')
+        addToolbar(client)
+      }
 
       if (!isMounted) {
         return

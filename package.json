@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@databases/pg-migrations": "^5.0.3",
+    "@electric-sql/debug-toolbar": "^1.2.1-canary.f4e9e28",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
