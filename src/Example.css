@@ -34,7 +34,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  width: min(75vw, 450px);
+  width: min(75vw, 500px);
 }
 
 .list-name {
@@ -79,6 +79,15 @@
   font-size: 16px;
   font-weight: 500;
   padding: 10px 18px;
+  white-space: nowrap;
+}
+
+.button:disabled {
+  background: #444;
+  border: 2px solid #666;
+  color: #bbb;
+  pointer-events: none;
+  
 }
 
 .item {

@@ -7,8 +7,9 @@ import { useElectric } from './ElectricProvider'
 import './Example.css'
 
 export const Example = () => {
-  const { db } = useElectric()!
+  const { db, sync } = useElectric()!
   const [ selectedListId, setSelectedListId ] = useState<string>()
+  const [ listSynced, setListSynced ] = useState(false)
   const { results } = useLiveQuery(db.items.liveMany({
     where: { list_id: selectedListId },
     orderBy: { created_at: 'desc' },
@@ -23,9 +24,7 @@ export const Example = () => {
   useEffect(() => {
     const syncItems = async () => {
       // Resolves when the shape subscription has been established.
-      const shape = await db.items.sync({
-        include: { lists: true },
-      })
+      const shape = await db.lists.sync()
 
       // Resolves when the data has been synced into the local database.
       await shape.synced
@@ -73,6 +72,7 @@ export const Example = () => {
         created_at: new Date(),
       },
     })
+    syncList(newListId)
     setSelectedListId(newListId)
   }
 
@@ -82,6 +82,38 @@ export const Example = () => {
       data: { name },
     })
   }
+
+  const syncList = async (id: string) => {
+    await db.items.sync({
+      where: { list_id: id },
+      key: `list:${id}`
+    })
+    await updateSynced()
+  }
+
+  const unsyncList = async (id: string) => {
+    await sync.unsubscribe([`list:${id}`])
+    await updateSynced()
+  }
+
+  const updateSynced = async () => {
+    if (!selectedListId) {
+      return
+    }
+    const syncedStatus = sync.syncStatus(`list:${selectedListId}`)
+    if (!syncedStatus) {
+      setListSynced(false)
+    } else {
+      const synced = ["active", "establishing"].includes(syncedStatus.status)
+      setListSynced(synced)
+    }
+  }
+
+  useEffect(() => {
+    updateSynced()
+    const int = setInterval(updateSynced, 500)
+    return () => clearInterval(int)
+  }, [selectedListId])
 
   const items: Item[] = results ?? []
 
@@ -101,7 +133,7 @@ export const Example = () => {
           + New list
         </button>
       </div>
-      {!list ? (
+      {!(selectedListId && list) ? (
         <small className="items">Select a list to get started</small>
       ) : (
         <div className="items">
@@ -114,15 +146,29 @@ export const Example = () => {
             }}
           />
           <div className="controls">
-            <button className="button" onClick={addItem}>
+            <button className="button" onClick={addItem} disabled={!listSynced}>
               Add Item
             </button>
-            <button className="button" onClick={clearItems}>
+            <button className="button" onClick={clearItems} disabled={!listSynced}>
               Clear Done
             </button>
             <button className="button" onClick={deleteList}>
               Delete List
             </button>
+            <label className="button">
+              <input
+                type="checkbox"
+                checked={listSynced}
+                onChange={(e) => {
+                  if (e.currentTarget.checked) {
+                    syncList(selectedListId!)
+                  } else {
+                    unsyncList(selectedListId!)
+                  }
+                }}
+              ></input>
+              Sync
+            </label>
           </div>
           {items.map((item: Item, index: number) => (
             <ItemLine key={index} item={item} />
